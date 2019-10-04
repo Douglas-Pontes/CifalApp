@@ -34,6 +34,19 @@ const styles = StyleSheet.create({
         marginTop: 5,
         fontSize: 14,
         color: '#828282'
+    },
+    newInventoryButton: {
+
+        bottom: 10,
+        right: 12,
+        alignSelf: 'flex-end',
+        backgroundColor: '#11592A',
+        height: 50,
+        width: 50,
+        borderRadius: 80,
+        position: 'absolute',
+        justifyContent: 'center',
+        alignItems: 'center'
     }
 })
 

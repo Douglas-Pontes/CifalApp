@@ -2,6 +2,7 @@ import { createAppContainer } from "react-navigation";
 import { createStackNavigator } from 'react-navigation-stack';
 
 import InventoryList from '../InventoryList/'
+import AddInventory from '../AddInventory/';
 
 const HomeNavigator = createAppContainer(
     createStackNavigator(
@@ -9,6 +10,9 @@ const HomeNavigator = createAppContainer(
             InventoryList: {
                 screen: InventoryList
             },
+            AddInventory: {
+                screen: AddInventory
+            }
         },
         {
             defaultNavigationOptions: {

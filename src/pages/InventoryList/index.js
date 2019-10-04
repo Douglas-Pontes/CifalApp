@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import {
-    SafeAreaView,
     Image,
     FlatList,
     View,
     Text,
     Picker,
+    TouchableOpacity
 } from 'react-native'
 import getRealm from '../../config/realm';
 
@@ -13,7 +13,6 @@ import Icon from 'react-native-vector-icons/AntDesign';
 import FeatherIcon from 'react-native-vector-icons/Feather';
 
 import styles from './styles';
-import { TouchableOpacity } from 'react-native-gesture-handler';
 
 export default class InventoryList extends Component {
     constructor(props) {
@@ -21,27 +20,17 @@ export default class InventoryList extends Component {
         this.state = {
             realm: null,
             filter: "Todos",
-            itens: [
-                {
-                    Nome: "199 - Douglas Pontes Santos",
-                    Remessa: 1240001,
-                    Situacao: "Finalizado",
-                    DataModificacao: "24/09/2019 10:00:00"
-                },
-                {
-                    Nome: "195 - Thales Henrique Viale",
-                    Remessa: 1240002,
-                    Situacao: "Aberto",
-                    DataModificacao: "24/09/2019 10:00:00"
-                },
-                {
-                    Nome: "198 - Guilherme Pagotto",
-                    Remessa: 1240003,
-                    Situacao: "Sincronizado",
-                    DataModificacao: "24/09/2019 10:00:00"
-                }
-            ]
+            itens: [],
+            CodUsuario: 1
         };
+
+        this.props.navigation.addListener("willFocus", async () => {
+            const realm = await getRealm();
+
+            let itens = realm.objects("Inventarios").filtered(`CodUsuario = ${this.state.CodUsuario}`);
+
+            this.setState({ itens });
+        })
     }
 
     static navigationOptions = {
@@ -51,32 +40,9 @@ export default class InventoryList extends Component {
     async componentDidMount() {
         const realm = await getRealm()
 
-        fetch("http://192.168.137.1:3000/produtos").then(response => response.json()).then(rf => {
-            console.log(rf)
-            var start = new Date().getTime();
+        let itens = realm.objects("Inventarios").filtered(`CodUsuario = ${this.state.CodUsuario}`);
 
-            realm.write(() => {
-                let allProducts = realm.objects('Produtos');
-                realm.delete(allProducts);
-
-                rf.map(item => {
-                    realm.create('Produtos', {
-                        CodProduto: item.CodProduto,
-                        Desceq: item.Desceq,
-                        Unideq: item.Unideq,
-                        Estoque: item.Estoque,
-                        PerVista: item.PerVista
-                    })
-                })
-            })
-
-            var end = new Date().getTime();
-
-            console.log(end - start);
-        })
-
-
-        this.setState({ realm });
+        this.setState({ realm, itens });
     }
 
     render() {
@@ -85,7 +51,7 @@ export default class InventoryList extends Component {
             : 'Loading...';
 
         return (
-            <View>
+            <View style={{ flex: 1 }}>
                 <View style={styles.containerFilter}>
                     <Picker style={styles.picker} selectedValue={this.state.filter} onValueChange={(itemValue) => this.setState({ filter: itemValue })}>
                         <Picker.Item label={"Todos"} value={"Todos"} />
@@ -97,7 +63,9 @@ export default class InventoryList extends Component {
                         <Icon name="caretdown" size={10} color="white" />
                     </View>
                 </View>
-                <FlatList data={this.state.itens} renderItem={({ item }) => (
+
+
+                <FlatList data={this.state.itens} keyExtractor={item => item.InventarioId} renderItem={({ item }) => (
                     <View style={styles.cardItem}>
                         <View style={{ flexDirection: 'row' }}>
                             {item.Situacao == "Aberto" && (<Image source={require("../../../assets/img/aberto.png")} style={{ width: 60, height: 60 }} />)}
@@ -110,12 +78,15 @@ export default class InventoryList extends Component {
                             </View>
                         </View>
 
-                        <Text style={styles.txtData}>{item.DataModificacao}</Text>
+                        <Text style={styles.txtData}>{item.DataAbertura.toLocaleString()}</Text>
 
                         <FeatherIcon name="info" size={24} style={{ position: 'absolute', bottom: 40, right: 12 }} />
                     </View>
                 )} />
 
+                <TouchableOpacity style={styles.newInventoryButton} onPress={() => this.props.navigation.navigate("AddInventory")}>
+                    <Icon name="plus" size={26} color={"#FFF"} />
+                </TouchableOpacity>
             </View>
         )
     }
