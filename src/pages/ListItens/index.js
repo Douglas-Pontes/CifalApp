@@ -20,57 +20,60 @@ import styles from './styles';
 export default class InventoryList extends Component {
     constructor(props) {
         super(props);
+
         this.state = {
             realm: null,
-            filter: "Todos",
             itens: [],
             CodUsuario: 1,
-            activeRowKey: null
+            activeRowKey: null,
+            item: this.props.navigation.getParam("item")
         };
-
+        console.log(this.props.navigation.getParam("item"))
         this.props.navigation.addListener("willFocus", async () => {
-            const realm = await getRealm();
+            //const realm = await getRealm();
 
-            let itens = realm.objects("Inventarios").filtered(`CodUsuario = ${this.state.CodUsuario}`);
+            //let itens = realm.objects("ItensInventario").filtered(`InventarioId = ${this.props.navigation.getParam("InventarioId")}`);
 
-            this.setState({ itens });
+            //this.setState({ itens });
         })
     }
 
     static navigationOptions = {
-        title: "Lista de inventários",
+        title: "Itens Inventário",
     }
 
     async componentDidMount() {
         const realm = await getRealm()
-        this.setState({ realm });
 
-        this.obterInventarios();
+        this.setState({
+            realm
+        });
+
+        //this.obterItens();
     }
 
-    obterInventarios = () => {
+    obterItens = () => {
         const { realm } = this.state;
-        let itens = realm.objects("Inventarios").filtered(`CodUsuario = ${this.state.CodUsuario}`);
+
+        let itens = realm.objects("ItensInventario").filtered(`InventarioId = ${this.state.item.InventarioId}`);
+
         this.setState({ itens });
     }
 
     render() {
         return (
             <View style={{ flex: 1 }}>
-                <View style={styles.containerFilter}>
-                    <Picker style={styles.picker} selectedValue={this.state.filter} onValueChange={(itemValue) => this.setState({ filter: itemValue })}>
-                        <Picker.Item label={"Todos"} value={"Todos"} />
-                        <Picker.Item label={"Aberto"} value={"Aberto"} />
-                        <Picker.Item label={"Finalizado"} value={"Finalizado"} />
-                        <Picker.Item label={"Sincronizado"} value={"Sincronizado"} />
-                    </Picker>
-                    <View style={styles.arrowDown}>
-                        <Icon name="caretdown" size={10} color="white" />
+                <View>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#d0d0d0', borderWidth: 1, borderColor: '#828282', padding: 5 }}>
+                        <Image source={require('../../../assets/img/caixa2.png')} style={{ width: 40, height: 40 }} />
+                        <View style={{ marginLeft: 10 }}>
+                            <Text style={{ fontWeight: '700', fontSize: 16 }}>{this.state.item.CodVen} - {this.state.item.Nome}</Text>
+                            <Text>Remessa: {this.state.item.Remessa}</Text>
+                        </View>
+                        <Text style={{ position: 'absolute', right: 5, alignSelf: 'flex-end' }}>{this.state.item.DataAbertura.toLocaleString()}</Text>
                     </View>
                 </View>
-
-
-                <FlatList data={this.state.itens} keyExtractor={item => item.InventarioId} renderItem={({ item, index }) => (
+                <FlatList data={this.state.itens} keyExtractor={item => item.CodProduto} renderItem={({ item, index }) => (
                     <Swipeable rightButtons={[
                         <TouchableOpacity
                             style={styles.btnDelete}
@@ -84,10 +87,10 @@ export default class InventoryList extends Component {
                                             const { realm } = this.state;
 
                                             realm.write(() => {
-                                                realm.delete(realm.objectForPrimaryKey('Inventarios', this.state.itens[index].InventarioId));
+                                                realm.delete(realm.objectForPrimaryKey('ItensInventario', this.state.itens[index].CodProduto));
                                             })
 
-                                            this.obterInventarios();
+                                            this.obterItens();
                                         }
                                     }],
                                     { cancelable: true }
@@ -98,9 +101,10 @@ export default class InventoryList extends Component {
                     ]}>
                         <View style={styles.cardItem}>
                             <View style={{ flexDirection: 'row' }}>
-                                {item.Situacao == "Aberto" && (<Image source={require("../../../assets/img/aberto.png")} style={{ width: 60, height: 60 }} />)}
-                                {item.Situacao == "Sincronizado" && (<Image source={require("../../../assets/img/sincronizado.png")} style={{ width: 60, height: 60 }} />)}
-                                {item.Situacao == "Finalizado" && (<Image source={require("../../../assets/img/Oks.png")} style={{ width: 60, height: 60 }} />)}
+                                <View>
+                                    <Text>Unidade:</Text>
+                                    <Text>{item.Unideq}</Text>
+                                </View>
                                 <View style={{ flex: 1, marginLeft: 10 }}>
                                     <Text style={styles.txtNome}>{item.Nome}</Text>
                                     <Text>Remessa: {item.Remessa}</Text>
@@ -110,14 +114,12 @@ export default class InventoryList extends Component {
 
                             <Text style={styles.txtData}>{item.DataAbertura.toLocaleString()}</Text>
 
-                            <TouchableOpacity onPress={() => this.props.navigation.navigate("InventoryDetails", { item: item })} style={{ position: 'absolute', bottom: 40, right: 12 }}>
-                                <FeatherIcon name="info" size={24} />
-                            </TouchableOpacity>
+                            <FeatherIcon name="info" size={24} style={{ position: 'absolute', bottom: 40, right: 12 }} />
                         </View>
                     </Swipeable>
                 )} />
 
-                <TouchableOpacity style={styles.newInventoryButton} onPress={() => this.props.navigation.navigate("AddInventory")}>
+                <TouchableOpacity style={styles.newInventoryButton}>
                     <Icon name="plus" size={26} color={"#FFF"} />
                 </TouchableOpacity>
             </View>

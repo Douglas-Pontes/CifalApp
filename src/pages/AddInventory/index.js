@@ -15,6 +15,8 @@ import styles from './styles';
 import getRealm from '../../config/realm';
 import api from '../../config/api';
 import uuid from 'react-native-uuid';
+import { showMessage, hideMessage } from "react-native-flash-message";
+
 
 export default class AddInventory extends Component {
     constructor(props) {
@@ -24,7 +26,10 @@ export default class AddInventory extends Component {
             CodVen: null,
             Nome: null,
             Remessa: null,
+            DataAbertura: null,
             CodUsuario: 1,
+            InventarioId: null,
+            item: null
         }
     }
 
@@ -39,10 +44,12 @@ export default class AddInventory extends Component {
 
     salvarInventario = () => {
         const { realm, CodVen, Remessa, Nome } = this.state;
+        var guid = uuid.v1()
+        let created;
 
         realm.write(() => {
-            realm.create('Inventarios', {
-                InventarioId: uuid.v1(),
+            created = realm.create('Inventarios', {
+                InventarioId: guid,
                 CodVen,
                 Remessa,
                 Nome,
@@ -55,41 +62,59 @@ export default class AddInventory extends Component {
                 CodUsuario: 1
             })
         })
+
+        showMessage({
+            message: "Inventário criado com sucesso! Por favor faça a leitura de itens.",
+            type: "success",
+        });
+
+        this.setState({ InventarioId: guid, item: created })
     }
 
     importarDados = async () => {
         const { realm, Remessa, CodVen, Nome } = this.state;
-        if (Remessa == null) {
-            alert('Por favor preencha a remessa');
+
+        if (Remessa == null || Remessa == '') {
+            showMessage({
+                message: "Por favor preencha a remessa!",
+                type: "danger",
+            });
             return;
         }
-        if (CodVen == null) {
-            alert('Por favor preencha o Código');
+        if (CodVen == null || CodVen == '') {
+            showMessage({
+                message: "Por favor preencha o código do vendedor!",
+                type: "danger",
+            });
             return;
         }
-        if (Nome == null) {
-            alert('Por favor preencha o vendedor');
+
+        if (Nome == null || Nome == '') {
+            showMessage({
+                message: "Por favor preencha o vendedor!",
+                type: "danger",
+            });
             return;
         }
 
-        let remessas = await api.get('remessas/' + this.state.Remessa);
+        // let remessas = await api.get('remessas/' + this.state.Remessa);
 
-        let remessasToRemove = realm.objects("Remessas").filtered(`NumeroRemessa = ${this.state.Remessa}`);
-        console.log('remessas', remessasToRemove)
+        // let remessasToRemove = realm.objects("Remessas").filtered(`NumeroRemessa = ${this.state.Remessa}`);
+        // console.log('remessas', remessasToRemove)
 
-        realm.write(() => {
-            realm.delete(remessasToRemove);
+        // realm.write(() => {
+        //     realm.delete(remessasToRemove);
 
-            remessas.data.map(item => {
-                realm.create('Remessas', {
-                    NumeroRemessa: item.NumeroRemessa,
-                    CodVen: item.CodVen,
-                    CodProduto: item.CodProduto,
-                    Unid: item.Unid,
-                    Quantidade: item.Quantidade.toString()
-                })
-            })
-        })
+        //     remessas.data.map(item => {
+        //         realm.create('Remessas', {
+        //             NumeroRemessa: item.NumeroRemessa,
+        //             CodVen: item.CodVen,
+        //             CodProduto: item.CodProduto,
+        //             Unid: item.Unid,
+        //             Quantidade: item.Quantidade.toString()
+        //         })
+        //     })
+        // })
 
         this.salvarInventario()
     }
@@ -101,15 +126,15 @@ export default class AddInventory extends Component {
                     <Image source={require("../../../assets/img/caixa-aberta.png")} style={{ width: 80, height: 80 }} />
                     <Text>Novo Item</Text>
 
-                    <TextInput style={[styles.input, { marginTop: 20 }]} placeholder="Código" onChangeText={(CodVen) => this.setState({ CodVen: parseInt(CodVen) })} />
+                    <TextInput style={[styles.input, { marginTop: 20 }]} keyboardType={"number-pad"} placeholder="Código" onChangeText={(CodVen) => this.setState({ CodVen: CodVen == '' ? '' : parseInt(CodVen) })} />
                     <TextInput style={styles.input} placeholder="Vendedor" onChangeText={(Nome) => this.setState({ Nome })} />
-                    <TextInput style={styles.input} placeholder="Remessa" onChangeText={(Remessa) => this.setState({ Remessa: parseInt(Remessa) })} />
+                    <TextInput style={styles.input} placeholder="Remessa" keyboardType={"number-pad"} onChangeText={(Remessa) => this.setState({ Remessa: Remessa == '' ? '' : parseInt(Remessa) })} />
 
                     <TouchableOpacity style={styles.btn} onPress={this.importarDados}>
                         <Image source={require("../../../assets/img/download-da-nuvem.png")} style={{ width: 27, height: 27 }} />
                         <Text style={styles.btnText}>Importar dados</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.btn}>
+                    <TouchableOpacity style={styles.btn} onPress={() => this.props.navigation.navigate("ListItens", { item: this.state.item })}>
                         <Icon name="barcode" size={24} color="white" />
                         <Text style={styles.btnText}>Leitura de Itens</Text>
                     </TouchableOpacity>
