@@ -3,7 +3,7 @@ export default class ItemSchema {
         name: 'ItensInventario',
         primaryKey: 'CodProduto',
         properties: {
-            CodProduto: 'int',
+            CodProduto: 'string',
             InventarioId: 'string',
             Desceq: 'string',
             Unideq: 'string',

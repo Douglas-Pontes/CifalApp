@@ -31,7 +31,7 @@ export default class InventoryList extends Component {
         this.props.navigation.addListener("willFocus", async () => {
             const realm = await getRealm();
 
-            let itens = realm.objects("Inventarios").filtered(`CodUsuario = ${this.state.CodUsuario}`);
+            let itens = realm.objects("Inventarios").filtered('CodUsuario == "' + this.state.CodUsuario + '"');
 
             this.setState({ itens });
         })

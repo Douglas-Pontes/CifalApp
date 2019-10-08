@@ -68,7 +68,7 @@ export default class AddInventory extends Component {
                         starStyle={{ color: 'green' }}
                     />
                 </View>
-                <TouchableOpacity style={styles.btn} onPress={() => this.props.navigation.navigate("ListItens", { item: this.state.item })}>
+                <TouchableOpacity style={styles.btn} onPress={() => this.props.navigation.navigate("ListItens", { item: this.state.item, tipoPagina: 2 })}>
                     <Icon name="barcode" size={24} color="white" />
                     <Text style={styles.btnText}>Leitura de Itens</Text>
                 </TouchableOpacity>

@@ -7,6 +7,7 @@ import {
     Picker,
     TouchableOpacity,
     TouchableHighlight,
+    BackHandler,
     Alert
 } from 'react-native'
 import getRealm from '../../config/realm';
@@ -28,18 +29,37 @@ export default class InventoryList extends Component {
             activeRowKey: null,
             item: this.props.navigation.getParam("item")
         };
-        console.log(this.props.navigation.getParam("item"))
+
         this.props.navigation.addListener("willFocus", async () => {
-            //const realm = await getRealm();
+            const realm = await getRealm();
 
-            //let itens = realm.objects("ItensInventario").filtered(`InventarioId = ${this.props.navigation.getParam("InventarioId")}`);
+            let itens = realm.objects("ItensInventario").filtered('InventarioId == "' + this.state.item.InventarioId + '"');
 
-            //this.setState({ itens });
+            this.setState({ itens });
         })
     }
 
-    static navigationOptions = {
-        title: "Itens Inventário",
+    static navigationOptions = ({ navigation }) => {
+        return {
+            title: "Itens Inventário",
+            gesturesEnabled: false,
+            headerLeft: () => {
+                if (navigation.getParam("tipoPagina") == 1) {
+                    return (
+                        <TouchableOpacity onPress={() => navigation.navigate("InventoryList", { item: navigation.getParam("item") })}>
+                            <Icon name="arrowleft" size={22} color="white" style={{ marginLeft: 15 }} />
+                        </TouchableOpacity>
+                    )
+                }
+                else {
+                    return (
+                        <TouchableOpacity onPress={() => navigation.goBack()}>
+                            <Icon name="arrowleft" size={22} color="white" style={{ marginLeft: 15 }} />
+                        </TouchableOpacity>
+                    )
+                }
+            }
+        }
     }
 
     async componentDidMount() {
@@ -49,13 +69,13 @@ export default class InventoryList extends Component {
             realm
         });
 
-        //this.obterItens();
+        this.obterItens();
     }
 
     obterItens = () => {
         const { realm } = this.state;
 
-        let itens = realm.objects("ItensInventario").filtered(`InventarioId = ${this.state.item.InventarioId}`);
+        let itens = realm.objects("ItensInventario").filtered('InventarioId == "' + this.state.item.InventarioId + '"');
 
         this.setState({ itens });
     }
@@ -106,20 +126,16 @@ export default class InventoryList extends Component {
                                     <Text>{item.Unideq}</Text>
                                 </View>
                                 <View style={{ flex: 1, marginLeft: 10 }}>
-                                    <Text style={styles.txtNome}>{item.Nome}</Text>
-                                    <Text>Remessa: {item.Remessa}</Text>
-                                    <Text>Situação: {item.Situacao}</Text>
+                                    <Text style={styles.txtNome}>Produto 1</Text>
+                                    <Text>Codigo Barras: 2313123123123123</Text>
+                                    <Text>Quantidade: {item.Estoque}</Text>
                                 </View>
                             </View>
-
-                            <Text style={styles.txtData}>{item.DataAbertura.toLocaleString()}</Text>
-
-                            <FeatherIcon name="info" size={24} style={{ position: 'absolute', bottom: 40, right: 12 }} />
                         </View>
                     </Swipeable>
                 )} />
 
-                <TouchableOpacity style={styles.newInventoryButton}>
+                <TouchableOpacity style={styles.newInventoryButton} onPress={() => this.props.navigation.navigate("AddItens", { InventarioId: this.state.item.InventarioId })}>
                     <Icon name="plus" size={26} color={"#FFF"} />
                 </TouchableOpacity>
             </View>

@@ -29,7 +29,8 @@ export default class AddInventory extends Component {
             DataAbertura: null,
             CodUsuario: 1,
             InventarioId: null,
-            item: null
+            item: null,
+            btnImportarDados: true
         }
     }
 
@@ -68,7 +69,9 @@ export default class AddInventory extends Component {
             type: "success",
         });
 
-        this.setState({ InventarioId: guid, item: created })
+        this.setState({ InventarioId: guid, item: created, btnImportarDados: true })
+
+        this.props.navigation.navigate("ListItens", { item: created, tipoPagina: 1 })
     }
 
     importarDados = async () => {
@@ -128,16 +131,22 @@ export default class AddInventory extends Component {
 
                     <TextInput style={[styles.input, { marginTop: 20 }]} keyboardType={"number-pad"} placeholder="Código" onChangeText={(CodVen) => this.setState({ CodVen: CodVen == '' ? '' : parseInt(CodVen) })} />
                     <TextInput style={styles.input} placeholder="Vendedor" onChangeText={(Nome) => this.setState({ Nome })} />
-                    <TextInput style={styles.input} placeholder="Remessa" keyboardType={"number-pad"} onChangeText={(Remessa) => this.setState({ Remessa: Remessa == '' ? '' : parseInt(Remessa) })} />
+                    <TextInput style={styles.input} placeholder="Remessa" keyboardType={"number-pad"} onChangeText={(Remessa) => {
+                        this.setState({
+                            Remessa: Remessa == '' ? '' : parseInt(Remessa),
+                            btnImportarDados: Remessa == '' ? true : false,
+                        });
 
-                    <TouchableOpacity style={styles.btn} onPress={this.importarDados}>
+                    }} />
+
+                    <TouchableOpacity style={[styles.btn, { backgroundColor: this.state.btnImportarDados ? '#ccc' : '#11592A' }]} onPress={this.importarDados} disabled={this.state.btnImportarDados}>
                         <Image source={require("../../../assets/img/download-da-nuvem.png")} style={{ width: 27, height: 27 }} />
                         <Text style={styles.btnText}>Importar dados</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.btn} onPress={() => this.props.navigation.navigate("ListItens", { item: this.state.item })}>
+                    {/* <TouchableOpacity style={[styles.btn, { backgroundColor: this.state.btnLeituraItem ? '#ccc' : '#11592A' }]} onPress={() => this.props.navigation.navigate("ListItens", { item: this.state.item })} disabled={this.state.btnLeituraItem}>
                         <Icon name="barcode" size={24} color="white" />
                         <Text style={styles.btnText}>Leitura de Itens</Text>
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
                 </View>
             </ScrollView>
         )

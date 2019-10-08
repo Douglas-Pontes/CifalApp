@@ -5,6 +5,7 @@ import InventoryList from '../InventoryList/'
 import AddInventory from '../AddInventory/';
 import ListItens from '../ListItens/';
 import InventoryDetails from '../InventoryDetails';
+import AddItens from '../AddItens';
 
 const HomeNavigator = createAppContainer(
     createStackNavigator(
@@ -20,6 +21,9 @@ const HomeNavigator = createAppContainer(
             },
             InventoryDetails: {
                 screen: InventoryDetails
+            },
+            AddItens: {
+                screen: AddItens
             }
         },
         {
