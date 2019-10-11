@@ -123,11 +123,11 @@ export default class InventoryList extends Component {
                             <View style={{ flexDirection: 'row' }}>
                                 <View>
                                     <Text>Unidade:</Text>
-                                    <Text>{item.Unideq}</Text>
+                                    <Text style={{ fontSize: 26, fontWeight: '700' }}>{item.Unideq}</Text>
                                 </View>
                                 <View style={{ flex: 1, marginLeft: 10 }}>
-                                    <Text style={styles.txtNome}>Produto 1</Text>
-                                    <Text>Codigo Barras: 2313123123123123</Text>
+                                    <Text style={styles.txtNome}>{item.Desceq}</Text>
+                                    <Text>Codigo Barras: {item.CodEan14}</Text>
                                     <Text>Quantidade: {item.Estoque}</Text>
                                 </View>
                             </View>

@@ -6,7 +6,8 @@ export default class AtendimentoSchema {
             Desceq: 'string',
             Unideq: 'string',
             Estoque: 'string',
-            PerVista: 'string'
+            PerVista: 'string',
+            CodEan14: 'string'
         }
     }
 }

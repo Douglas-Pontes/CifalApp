@@ -6,6 +6,7 @@ import {
     View,
     Text,
     StatusBar,
+    Image
 } from 'react-native'
 
 import Icon from 'react-native-vector-icons/Fontisto';
@@ -16,9 +17,16 @@ export default class Sync extends Component {
     }
 
     static navigationOptions = {
-        tabBarIcon: () => (
-            <Icon name="arrow-swap" color={"white"} size={20} style={{ transform: [{ rotate: '90deg' }] }} />
-        )
+        tabBarIcon: ({ focused }) => {
+            if (focused)
+                return (
+                    <Image source={require('../../../assets/img/synchronization-arrows.png')} style={{ width: 26, height: 26 }} />
+                )
+            else
+                return (
+                    <Image source={require('../../../assets/img/synchronization-arrows-outline.png')} style={{ width: 26, height: 25 }} />
+                )
+        }
     }
 
     render() {

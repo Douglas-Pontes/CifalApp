@@ -50,7 +50,7 @@ export default class InventoryList extends Component {
 
     obterInventarios = () => {
         const { realm } = this.state;
-        let itens = realm.objects("Inventarios").filtered(`CodUsuario = ${this.state.CodUsuario}`);
+        let itens = realm.objects("Inventarios").filtered('CodUsuario == "' + this.state.CodUsuario + '"');
         this.setState({ itens });
     }
 

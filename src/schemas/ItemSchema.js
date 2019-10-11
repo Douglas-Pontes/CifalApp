@@ -8,7 +8,9 @@ export default class ItemSchema {
             Desceq: 'string',
             Unideq: 'string',
             Estoque: 'string',
-            PerVista: 'string'
+            PerVista: 'string',
+            CodEan14: 'string',
+            Created: 'date'
         }
     }
 }
