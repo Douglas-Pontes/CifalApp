@@ -10,6 +10,7 @@ import {
 } from 'react-native'
 
 import Icon from 'react-native-vector-icons/AntDesign';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import styles from './styles';
 import api from '../../config/api';
 import getRealm from '../../config/realm';
@@ -24,9 +25,16 @@ export default class Config extends Component {
     }
 
     static navigationOptions = {
-        tabBarIcon: () => (
-            <Icon name="setting" color={"white"} size={24} />
-        )
+        tabBarIcon: ({ focused }) => {
+            if (focused)
+                return (
+                    <MaterialCommunityIcons name="settings" color={"white"} size={24} />
+                )
+            else
+                return (
+                    <MaterialCommunityIcons name="settings-outline" color={"white"} size={24} />
+                )
+        }
     }
 
     async componentDidMount() {

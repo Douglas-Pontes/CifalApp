@@ -5,6 +5,7 @@ export default class RemessaSchema {
             NumeroRemessa: 'int',
             CodVen: 'int',
             CodProduto: 'int',
+            Nome: 'string',
             Unid: 'string',
             Quantidade: 'string'
         }

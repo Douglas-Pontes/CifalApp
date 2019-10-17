@@ -104,7 +104,7 @@ export default class AddItens extends Component {
 
                         realm.write(() => {
                             realm.create('ItensInventario', {
-                                CodProduto: guid,
+                                CodProduto: produto[0].CodProduto.toString(),
                                 InventarioId: this.state.InventarioId,
                                 Desceq: produto[0].Desceq,
                                 Unideq: produto[0].Unideq,

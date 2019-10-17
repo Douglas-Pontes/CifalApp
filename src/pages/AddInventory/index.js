@@ -8,7 +8,7 @@ import {
     TouchableOpacity,
     TextInput
 } from 'react-native'
-
+import ModalSelector from 'react-native-modal-selector';
 import Icon from 'react-native-vector-icons/AntDesign';
 
 import styles from './styles';
@@ -30,13 +30,22 @@ export default class AddInventory extends Component {
             CodUsuario: 1,
             InventarioId: null,
             item: null,
-            btnImportarDados: true
+            btnImportarDados: true,
+            Vendedores: []
         }
     }
 
     async componentDidMount() {
         const realm = await getRealm();
-        this.setState({ realm })
+
+        let VendedoresAux = await api.get('/vendedores');
+        let Vendedores = [];
+
+        VendedoresAux.data.map(item => {
+            Vendedores.push({ label: item.Nome, key: item.CodVen })
+        });
+
+        this.setState({ realm, Vendedores: Vendedores })
     }
 
     static navigationOptions = {
@@ -51,8 +60,8 @@ export default class AddInventory extends Component {
         realm.write(() => {
             created = realm.create('Inventarios', {
                 InventarioId: guid,
-                CodVen,
-                Remessa,
+                CodVen: parseInt(CodVen),
+                Remessa: parseInt(Remessa),
                 Nome,
                 Situacao: 'Aberto',
                 DataAbertura: new Date(),
@@ -100,26 +109,45 @@ export default class AddInventory extends Component {
             return;
         }
 
-        // let remessas = await api.get('remessas/' + this.state.Remessa);
+        let remessas = await api.get('remessas/' + this.state.Remessa);
 
-        // let remessasToRemove = realm.objects("Remessas").filtered(`NumeroRemessa = ${this.state.Remessa}`);
-        // console.log('remessas', remessasToRemove)
+        if (remessas.data == null || remessas.data == undefined) {
+            showMessage({
+                message: 'Não foi encontrado nenhum remessa para este vendedor ou verifique sua conexão a internet.',
+                type: 'danger'
+            });
 
-        // realm.write(() => {
-        //     realm.delete(remessasToRemove);
+            return;
+        }
 
-        //     remessas.data.map(item => {
-        //         realm.create('Remessas', {
-        //             NumeroRemessa: item.NumeroRemessa,
-        //             CodVen: item.CodVen,
-        //             CodProduto: item.CodProduto,
-        //             Unid: item.Unid,
-        //             Quantidade: item.Quantidade.toString()
-        //         })
-        //     })
-        // })
+        let remessasToRemove = realm.objects("Remessas").filtered('NumeroRemessa == "' + this.state.Remessa + '"');
+        console.log('remessas', remessasToRemove)
+
+        realm.write(() => {
+            realm.delete(remessasToRemove);
+
+            remessas.data.map(item => {
+                realm.create('Remessas', {
+                    NumeroRemessa: item.NumeroRemessa,
+                    CodVen: item.CodVen,
+                    CodProduto: item.CodProduto,
+                    Nome: item.Nome,
+                    Unid: item.Unid,
+                    Quantidade: item.Quantidade.toString()
+                })
+            })
+        })
 
         this.salvarInventario()
+    }
+
+    onChangeVendedor = (CodVen, Nome) => {
+        if (Nome == "Douglas") {
+            this.setState({ CodVen: CodVen.toString(), Nome, btnImportarDados: false, Remessa: (10001).toString() });
+        } else {
+            this.setState({ CodVen: CodVen.toString(), Nome, btnImportarDados: false, Remessa: (10000).toString() });
+        }
+
     }
 
     render() {
@@ -129,16 +157,40 @@ export default class AddInventory extends Component {
                     <Image source={require("../../../assets/img/caixa-aberta.png")} style={{ width: 80, height: 80 }} />
                     <Text>Novo Item</Text>
 
-                    <TextInput style={[styles.input, { marginTop: 20 }]} keyboardType={"number-pad"} placeholder="Código" onChangeText={(CodVen) => this.setState({ CodVen: CodVen == '' ? '' : parseInt(CodVen) })} />
-                    <TextInput style={styles.input} placeholder="Vendedor" onChangeText={(Nome) => this.setState({ Nome })} />
-                    <TextInput style={styles.input} placeholder="Remessa" keyboardType={"number-pad"} onChangeText={(Remessa) => {
-                        this.setState({
-                            Remessa: Remessa == '' ? '' : parseInt(Remessa),
-                            btnImportarDados: Remessa == '' ? true : false,
-                        });
-
-                    }} />
-
+                    <ModalSelector
+                        data={this.state.Vendedores}
+                        initValue="Select something yummy!"
+                        supportedOrientations={['portrait']}
+                        accessible={true}
+                        style={[styles.input, { marginTop: 20 }]}
+                        scrollViewAccessibilityLabel={'Scrollable options'}
+                        cancelButtonAccessibilityLabel={'Cancelar'}
+                        cancelText={'Cancelar'}
+                        onChange={(option) => { this.onChangeVendedor(option.key, option.label) }}>
+                        <TextInput keyboardType={"number-pad"} value={this.state.CodVen} placeholder="Código" />
+                    </ModalSelector>
+                    <ModalSelector
+                        data={this.state.Vendedores}
+                        supportedOrientations={['portrait']}
+                        accessible={true}
+                        style={[styles.input]}
+                        scrollViewAccessibilityLabel={'Scrollable options'}
+                        cancelButtonAccessibilityLabel={'Cancelar'}
+                        cancelText={'Cancelar'}
+                        onChange={(option) => { this.onChangeVendedor(option.key, option.label) }}>
+                        <TextInput placeholder="Vendedor" value={this.state.Nome} />
+                    </ModalSelector>
+                    <ModalSelector
+                        data={this.state.Vendedores}
+                        supportedOrientations={['portrait']}
+                        accessible={true}
+                        style={[styles.input]}
+                        scrollViewAccessibilityLabel={'Scrollable options'}
+                        cancelButtonAccessibilityLabel={'Cancelar'}
+                        cancelText={'Cancelar'}
+                        onChange={(option) => { this.onChangeVendedor(option.key, option.label) }}>
+                        <TextInput placeholder="Remessa" keyboardType={"number-pad"} value={this.state.Remessa} />
+                    </ModalSelector>
                     <TouchableOpacity style={[styles.btn, { backgroundColor: this.state.btnImportarDados ? '#ccc' : '#11592A' }]} onPress={this.importarDados} disabled={this.state.btnImportarDados}>
                         <Image source={require("../../../assets/img/download-da-nuvem.png")} style={{ width: 27, height: 27 }} />
                         <Text style={styles.btnText}>Importar dados</Text>
